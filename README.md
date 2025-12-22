@@ -12,7 +12,7 @@ Team members:
 - Nguyễn Đình Giang (Zang): member,
 - Hoàng Viết Đức (Florian): member,
 - Nguyễn Mỹ (Miidai): member,
-- Nguyễn Minh Đức (Hornyguy): member,
+- Nguyễn Minh Đức (Gr1mEd): member,
 
 
 ## Summary on the topic
