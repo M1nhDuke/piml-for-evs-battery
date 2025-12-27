@@ -20,12 +20,12 @@ Team members:
 
 The world is witnessing a powerful wave of green transition. In the face of this trend, electric vehicles have become one of the most scrutinized, thanks to their ability to reduce fossil fuel consumption and greenhouse gas emissions. Major automakers such as Tesla (USA), Honda (Japan), Hyundai (Korea), and Vinfast (Vietnam) have been investing in the production of hybrid and electric vehicles to capitalize on this trend. However, they are all facing obstacles in electric vehicle battery technology: suboptimal battery materials or technical specifications.
 
-In this project, we will apply a PIML model on data about a specific lithium-ion battery samples, which is used in Vinfast's VF9 and Tesla Model 3, to optimize battery temperature and charging power. In other words, with this battery sample, we will find an optimized way to charge the battery quickly while ensuring it doesn't overheat, preventing fire hazards and extending battery life.
+In this project, we will apply a PIML model on data about a specific lithium-ion battery samples, provided by Hong Kong Polytechnic University (China), to optimize battery temperature and charging power. In other words, with this battery sample, we will find an optimized way to charge the battery quickly while ensuring it doesn't overheat, preventing fire hazards and extending battery life.
 
 
 ## 3. Proposed model
 
-We do not use any pre-trained model. We train our own PIML model with pytorch and some physical equations. For more information about our model, please read our [report]().
+We are planning to not use any pre-trained model. We train our own PIML model with pytorch and some physical equations. For more information about our model, please read our [report]().
 
 
 ## 4. Related papers
