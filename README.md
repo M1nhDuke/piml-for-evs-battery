@@ -34,17 +34,14 @@ We have found numerous high-quality papers on this topic published over the past
  - Heat Transfer Modeling and Optimal Thermal Management of Electric Vehicle Battery Systems [(MDPI, 2025)](https://www.mdpi.com/1996-1073/17/18/4575)
  - Physics-Informed Machine Learning Approach for Estimating Lithium-Ion Battery Temperature [(IEEE, 2022)](https://ieeexplore.ieee.org/document/9858911)
  - Critical Review of Temperature Prediction for Lithium-Ion Batteries in Electric Vehicles [(MDPI, 2024)](https://www.mdpi.com/2313-0105/10/12/421)
- - Physics-informed machine learning for lithium-ion batteries: A review [(ScienceDirect, 2023)](https://www.sciencedirect.com/science/article/pii/S037877532300062X)
  - Physics-Informed Neural Networks for Battery Thermal Modeling [(IEEE, 2023)](https://ieeexplore.ieee.org/document/10100412)
  - Thermal Management Optimization in EV Battery Pack Assembly: A Data-Driven Approach Using AI- Based Feedback Loops [(ResearchGate, 2024)](https://www.researchgate.net/publication/394306531_Thermal_Management_Optimization_in_EV_Battery_Pack_Assembly_A_Data-Driven_Approach_Using_AI-_Based_Feedback_Loops)
- - Fast-Charging Optimization Method for Lithium-Ion Battery Packs Based on Deep Deterministic Policy Gradient Algorithm [(MDPI, 2025)](https://www.mdpi.com/2313-0105/11/5/199)
- - Machine learning-based fast charging of lithium-ion battery by perceiving and regulating internal microscopic states [(ScienceDirect, 2023)](https://www.sciencedirect.com/science/article/abs/pii/S2405829722006912)
- - A Review on Advanced Battery Thermal Management Systems for Fast Charging in Electric Vehicles [(MDPI, 2024)](https://www.mdpi.com/2313-0105/10/10/372)
 
+Here is the link to our [summary for each papers](https://docs.google.com/document/d/1fd2wR5t4fOKbkepD0492d2HveSrJscDjacWE2ZeskKg/edit?usp=sharing).
 
 ## 5. Dataset
 
-We conducted research and found many high-quality online datasets, such as those from [NASA](https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/) and [Kaggle](https://www.kaggle.com/datasets/valakhorasani/electric-vehicle-charging-patterns/data). Unfortunately, most of them did not meet out requirements regarding parameters related to battery temperature and their charging cycles. After testing and evaluating, we decided to use the dataset from [Stanford university](https://data.mendeley.com/datasets/7vdkzpnjgj/2) on Mendeley Data as it contained everything we need in this project. Here is some information about it:
+We conducted research and found many high-quality online datasets, such as those from [NASA](https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/) and [Kaggle](https://www.kaggle.com/datasets/valakhorasani/electric-vehicle-charging-patterns/data). Unfortunately, most of them did not meet out requirements regarding parameters related to battery temperature and their charging cycles. After testing and evaluating, we decided to use the dataset from [Shenzhen Auto Electric Power Plant Co., Ltd (Autosun) and Hong Kong Polytechnic University](https://data.mendeley.com/datasets/c7gg94tmvz/3) on Mendeley Data as it contained everything we need in this project. 
 
 
 ## 6. Tech stack
