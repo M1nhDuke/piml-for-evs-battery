@@ -25,7 +25,7 @@ In this project, we will apply a PIML model on data about a specific lithium-ion
 
 ## 3. Proposed model
 
-We are planning to not use any pre-trained model. We train our own PIML model with pytorch and some physical equations. For more information about our model, please read our [report]().
+We are planning to not use any pre-trained model. We train our own PINN with pytorch and some physical equations. For more information about our model, please read our [report]().
 
 
 ## 4. Related papers
