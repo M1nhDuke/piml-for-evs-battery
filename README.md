@@ -13,7 +13,7 @@ Team members:
 - Nguyễn Đình Giang (Zang): member, model trainer
 - Hoàng Viết Đức (Florian): member, model trainer
 - Nguyễn Mỹ (Miidai): member, data collector, 
-- Nguyễn Minh Đức (Gr1mEd): member, jerker, gooner :))
+- Nguyễn Minh Đức (Gr1mEd): member, data collector.
 
 
 ## 2. Summary on the topic
