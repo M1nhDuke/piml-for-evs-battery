@@ -4,7 +4,7 @@
 
 This is our final project for the course Introduction to AI in USTH. 
 
-Topic: Physics-Informed Machine Learning (PIML) model for battery temperature prediction and smart charging control in electric vehicles (EVs)
+Topic: Physics-Informed Machine Learning (PIML) model for battery temperature prediction in electric vehicles (EVs)
 
 Team name: **USTH.HoLaDream** (#CR7)
 
@@ -53,7 +53,7 @@ We conducted research and found many free high-quality online datasets. There ar
 - [Shenzhen Auto Electric Power Plant Co., Ltd (Autosun) and Hong Kong Polytechnic University](https://data.mendeley.com/datasets/c7gg94tmvz/3)
 - [Oxford University](https://ora.ox.ac.uk/objects/uuid:03ba4b01-cfed-46d3-9b1a-7d4a7bdf6fac)
 
-Unfortunately, most of them did not meet out requirements regarding parameters related to battery temperature, initial state of charge and charging tme. After testing and evaluating, we decided to use the dataset from [Kaggle(2)](https://www.kaggle.com/datasets/ziya07/ev-battery-charging-data) as it contained everything we need in this project. 
+Unfortunately, most of them did not meet out requirements regarding parameters related to battery temperature, initial state of charge and charging tme. After testing and evaluating, we decided to use the dataset from [Kaggle(2)](https://www.kaggle.com/datasets/ziya07/ev-battery-charging-data). We had no intention of using data from Kaggle because we couldn't guarantee whether the data we used was real-world data or AI-generated; however, we had no other choice but to use it as it contained everything we need in this project. 
 
 
 ## 6. Tech stack
