@@ -44,11 +44,12 @@ class BatteryPINN(nn.Module):
       - Temperature [°C] normalized to [0,1]
       - Voltage [V] normalized to [0,1]
       - Current [A] normalized to [0,1]
-      - Label (charging mode class) [0-2]
+      - Charging Mode (categorical, 0-2)
     
     Outputs:
       - Optimized Charging Time [0-1] (denormalized to minutes)
       - Maximum Battery Temperature [0-1] (denormalized to °C)
+      - Mean Battery Temperature [0-1] (denormalized to °C)
     """
     def __init__(self, input_size=6, hidden_size=128):
         super(BatteryPINN, self).__init__()
@@ -67,9 +68,10 @@ class BatteryPINN(nn.Module):
         self.hidden3 = nn.Linear(hidden_size, hidden_size // 2)
         self.bn4 = nn.BatchNorm1d(hidden_size // 2)
         
-        # Output layers: 2 outputs (charging_time, max_temp)
+        # Output layers: 3 outputs (charging_time, max_temp, mean_temp)
         self.output_charging_time = nn.Linear(hidden_size // 2, 1)
         self.output_max_temp = nn.Linear(hidden_size // 2, 1)
+        self.output_mean_temp = nn.Linear(hidden_size // 2, 1)
         
         # Activation function (Tanh for better PINN performance)
         self.activation = nn.Tanh()
@@ -113,8 +115,9 @@ class BatteryPINN(nn.Module):
         # Output predictions (sigmoid to ensure [0, 1] range)
         charging_time = torch.sigmoid(self.output_charging_time(x))
         max_temp = torch.sigmoid(self.output_max_temp(x))
+        mean_temp = torch.sigmoid(self.output_mean_temp(x))
         
-        return charging_time, max_temp
+        return charging_time, max_temp, mean_temp
 
 # ==========================================
 # 3. PHYSICS LOSS FUNCTION (LCM - Lumped Capacitance Model)
@@ -180,36 +183,39 @@ def load_data(csv_path):
     print(f"Columns: {df.columns.tolist()}")
     
     # Identify inputs and outputs
-    # Inputs: Battery Type, SoC, Temp, Voltage, Current, Charging Mode/Label
-    # Outputs: Optimal Charging Duration Class (proxy for optimized charging time), Temperature
+    # Inputs: Battery Type, SoC, Temp, Voltage, Current, Charging Mode (6 features)
+    # Outputs: Charging Duration, Max Temp
     
     # Encode categorical variables
     le_battery = LabelEncoder()
     le_mode = LabelEncoder()
     
     battery_types = df['Battery Type'].values
-    charging_modes = df['Charging Mode'].values
-    
     df['Battery_Type_Encoded'] = le_battery.fit_transform(battery_types)
-    df['Charging_Mode_Encoded'] = le_mode.fit_transform(charging_modes)
     
-    # Extract input features
+    mode_types = df['Charging Mode'].values
+    df['Mode_Encoded'] = le_mode.fit_transform(mode_types)
+    
+    # Extract input features (6 total - includes charging mode)
     input_features = np.column_stack([
         df['Battery_Type_Encoded'].values,
         df['SOC (%)'].values,
         df['Battery Temp (Â°C)'].values,
         df['Voltage (V)'].values,
         df['Current (A)'].values,
-        df['Charging_Mode_Encoded'].values,
+        df['Mode_Encoded'].values,
     ])
     
     # Extract target outputs
     # 1. Optimal Charging Duration (normalized)
     charging_duration = df['Charging Duration (min)'].values
     
-    # 2. Maximum Battery Temperature (actual value, we'll predict it)
-    # Using actual battery temperature as a proxy for max temperature
+    # 2. Maximum Battery Temperature (using actual temp as proxy for max)
     max_temp = df['Battery Temp (Â°C)'].values
+    
+    # 3. Mean Battery Temperature (approximate as initial + 0.6 * temp_rise)
+    ambient_temp = df['Ambient Temp (Â°C)'].values
+    mean_temp = ambient_temp + 0.6 * (max_temp - ambient_temp)
     
     # Normalize inputs
     scaler_input = StandardScaler()
@@ -218,20 +224,22 @@ def load_data(csv_path):
     # Normalize outputs
     charging_duration_norm = charging_duration / MAX_CHARGE_TIME
     max_temp_norm = max_temp / MAX_TEMP
+    mean_temp_norm = mean_temp / MAX_TEMP
     
     # Create tensors
     X = torch.from_numpy(input_features_scaled).float().to(DEVICE)
     y_time = torch.from_numpy(charging_duration_norm.reshape(-1, 1)).float().to(DEVICE)
-    y_temp = torch.from_numpy(max_temp_norm.reshape(-1, 1)).float().to(DEVICE)
+    y_max_temp = torch.from_numpy(max_temp_norm.reshape(-1, 1)).float().to(DEVICE)
+    y_mean_temp = torch.from_numpy(mean_temp_norm.reshape(-1, 1)).float().to(DEVICE)
     
-    # Combine outputs
-    y = torch.cat([y_time, y_temp], dim=1)
+    # Combine outputs (3 outputs)
+    y = torch.cat([y_time, y_max_temp, y_mean_temp], dim=1)
     
     print(f"Inputs shape: {X.shape}")
     print(f"Outputs shape: {y.shape}")
     print(f"Input stats - Mean: {X.mean(dim=0)[:3]}, Std: {X.std(dim=0)[:3]}")
     
-    return X, y, scaler_input, le_battery, le_mode, charging_duration, max_temp
+    return X, y, scaler_input, le_battery, le_mode, charging_duration, max_temp, mean_temp
 
 def create_dataloaders(X, y, batch_size=BATCH_SIZE, train_ratio=0.8):
     """Split data and create data loaders."""
@@ -279,7 +287,7 @@ class EarlyStopping:
 def train():
     # Load data
     csv_path = "the_chosen_one  - data.csv"
-    X, y, scaler_input, le_battery, le_mode, raw_charging_time, raw_max_temp = load_data(csv_path)
+    X, y, scaler_input, le_battery, le_mode, raw_charging_time, raw_max_temp, raw_mean_temp = load_data(csv_path)
     
     # Create data loaders
     train_loader, val_loader = create_dataloaders(X, y, batch_size=BATCH_SIZE)
@@ -317,13 +325,14 @@ def train():
             optimizer.zero_grad(set_to_none=True)  # More memory efficient
             
             # Forward pass
-            charging_time_pred, max_temp_pred = model(batch_X)
+            charging_time_pred, max_temp_pred, mean_temp_pred = model(batch_X)
             
-            # Data loss (MSE for both outputs)
+            # Data loss (MSE for all 3 outputs)
             loss_data = criterion_mse(charging_time_pred, batch_y[:, 0:1]) + \
-                       criterion_mse(max_temp_pred, batch_y[:, 1:2])
+                       criterion_mse(max_temp_pred, batch_y[:, 1:2]) + \
+                       criterion_mse(mean_temp_pred, batch_y[:, 2:3])
             
-            # Physics loss (LCM constraints)
+            # Physics loss (LCM constraints using max_temp)
             loss_phys, _, _, _ = physics_loss_function(
                 model, batch_X, charging_time_pred, max_temp_pred,
                 batch_X[:, 3:4],  # Current (normalized)
@@ -350,9 +359,10 @@ def train():
         
         with torch.no_grad():
             for batch_X, batch_y in val_loader:
-                charging_time_pred, max_temp_pred = model(batch_X)
+                charging_time_pred, max_temp_pred, mean_temp_pred = model(batch_X)
                 loss_data = criterion_mse(charging_time_pred, batch_y[:, 0:1]) + \
-                           criterion_mse(max_temp_pred, batch_y[:, 1:2])
+                           criterion_mse(max_temp_pred, batch_y[:, 1:2]) + \
+                           criterion_mse(mean_temp_pred, batch_y[:, 2:3])
                 epoch_val_loss += loss_data.item()
         
         avg_val_loss = epoch_val_loss / len(val_loader)
@@ -387,7 +397,7 @@ def train():
         'scaler_mean': scaler_input.mean_,
         'scaler_scale': scaler_input.scale_,
         'battery_type_classes': le_battery.classes_,
-        'charging_mode_classes': le_mode.classes_,
+        'mode_classes': le_mode.classes_,
         'max_charge_time': MAX_CHARGE_TIME,
         'max_temp': MAX_TEMP,
         'max_current': MAX_CURRENT,
@@ -400,35 +410,45 @@ def train():
     # Print final metrics
     model.eval()
     all_preds_time = []
-    all_preds_temp = []
+    all_preds_max_temp = []
+    all_preds_mean_temp = []
     all_targets_time = []
-    all_targets_temp = []
+    all_targets_max_temp = []
+    all_targets_mean_temp = []
     
     with torch.no_grad():
         for batch_X, batch_y in DataLoader(TensorDataset(X, y), batch_size=BATCH_SIZE):
-            t_pred, temp_pred = model(batch_X)
+            t_pred, max_temp_pred, mean_temp_pred = model(batch_X)
             all_preds_time.append(t_pred.cpu().numpy())
-            all_preds_temp.append(temp_pred.cpu().numpy())
+            all_preds_max_temp.append(max_temp_pred.cpu().numpy())
+            all_preds_mean_temp.append(mean_temp_pred.cpu().numpy())
             all_targets_time.append(batch_y[:, 0:1].cpu().numpy())
-            all_targets_temp.append(batch_y[:, 1:2].cpu().numpy())
+            all_targets_max_temp.append(batch_y[:, 1:2].cpu().numpy())
+            all_targets_mean_temp.append(batch_y[:, 2:3].cpu().numpy())
     
     preds_time = np.vstack(all_preds_time)
-    preds_temp = np.vstack(all_preds_temp)
+    preds_max_temp = np.vstack(all_preds_max_temp)
+    preds_mean_temp = np.vstack(all_preds_mean_temp)
     targets_time = np.vstack(all_targets_time)
-    targets_temp = np.vstack(all_targets_temp)
+    targets_max_temp = np.vstack(all_targets_max_temp)
+    targets_mean_temp = np.vstack(all_targets_mean_temp)
     
     mse_time = np.mean((preds_time - targets_time) ** 2)
-    mse_temp = np.mean((preds_temp - targets_temp) ** 2)
+    mse_max_temp = np.mean((preds_max_temp - targets_max_temp) ** 2)
+    mse_mean_temp = np.mean((preds_mean_temp - targets_mean_temp) ** 2)
     rmse_time = np.sqrt(mse_time)
-    rmse_temp = np.sqrt(mse_temp)
+    rmse_max_temp = np.sqrt(mse_max_temp)
+    rmse_mean_temp = np.sqrt(mse_mean_temp)
     
     print(f"\nFinal Metrics (Normalized):")
     print(f"  Charging Time - MSE: {mse_time:.6f}, RMSE: {rmse_time:.6f}")
-    print(f"  Max Temperature - MSE: {mse_temp:.6f}, RMSE: {rmse_temp:.6f}")
+    print(f"  Max Temperature - MSE: {mse_max_temp:.6f}, RMSE: {rmse_max_temp:.6f}")
+    print(f"  Mean Temperature - MSE: {mse_mean_temp:.6f}, RMSE: {rmse_mean_temp:.6f}")
     
     print(f"\nFinal Metrics (Real Units):")
     print(f"  Charging Time - RMSE: {rmse_time * MAX_CHARGE_TIME:.4f} minutes")
-    print(f"  Max Temperature - RMSE: {rmse_temp * MAX_TEMP:.4f} °C")
+    print(f"  Max Temperature - RMSE: {rmse_max_temp * MAX_TEMP:.4f} °C")
+    print(f"  Mean Temperature - RMSE: {rmse_mean_temp * MAX_TEMP:.4f} °C")
 
 if __name__ == "__main__":
     train()

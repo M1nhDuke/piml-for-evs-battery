@@ -27,7 +27,10 @@ def load_trained_model(checkpoint_path='piml_battery_model.pth'):
     battery_encoder.classes_ = checkpoint['battery_type_classes']
     
     mode_encoder = LabelEncoder()
-    mode_encoder.classes_ = checkpoint['charging_mode_classes']
+    mode_encoder.classes_ = checkpoint['mode_classes']
+    
+    return model, scaler, battery_encoder, mode_encoder
+    mode_encoder.classes_ = checkpoint['mode_classes']
     
     return model, scaler, battery_encoder, mode_encoder
 
@@ -45,7 +48,7 @@ def predict(model, scaler, battery_encoder, mode_encoder,
         charging_mode: str - Charging mode (e.g., 'Fast', 'Slow', 'Normal')
     
     Returns:
-        dict with 'optimal_charging_time' (minutes) and 'max_temperature' (°C)
+        dict with 'optimal_charging_time' (minutes), 'max_temperature' (°C), and 'mean_temperature' (°C)
     """
     
     # Encode categorical inputs
@@ -70,15 +73,17 @@ def predict(model, scaler, battery_encoder, mode_encoder,
     
     # Inference
     with torch.no_grad():
-        charging_time_norm, max_temp_norm = model(input_tensor)
+        charging_time_norm, max_temp_norm, mean_temp_norm = model(input_tensor)
     
     # Denormalize outputs
     charging_time_pred = charging_time_norm.cpu().numpy()[0, 0] * MAX_CHARGE_TIME
     max_temp_pred = max_temp_norm.cpu().numpy()[0, 0] * MAX_TEMP
+    mean_temp_pred = mean_temp_norm.cpu().numpy()[0, 0] * MAX_TEMP
     
     return {
         'optimal_charging_time_minutes': float(charging_time_pred),
         'max_temperature_celsius': float(max_temp_pred),
+        'mean_temperature_celsius': float(mean_temp_pred),
         'input_features': {
             'battery_type': battery_type,
             'soc_percent': soc,
@@ -144,6 +149,7 @@ if __name__ == "__main__":
     print(f"\nPredictions:")
     print(f"  Optimal Charging Time: {result['optimal_charging_time_minutes']:.2f} minutes")
     print(f"  Maximum Temperature: {result['max_temperature_celsius']:.2f}°C")
+    print(f"  Mean Temperature: {result['mean_temperature_celsius']:.2f}°C")
     
     # Example 2: Batch prediction on dataset
     print("\n" + "="*80)
@@ -160,6 +166,7 @@ if __name__ == "__main__":
         print(f"  Predicted Max Temp: {result['max_temperature_celsius']:.2f}°C | "
               f"Actual: {result['actual_max_temp_celsius']:.2f}°C | "
               f"Error: {abs(result['max_temperature_celsius'] - result['actual_max_temp_celsius']):.2f}°C")
+        print(f"  Predicted Mean Temp: {result['mean_temperature_celsius']:.2f}°C")
     
     # Calculate average errors
     print("\n" + "="*80)
