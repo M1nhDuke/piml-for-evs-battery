@@ -45,9 +45,10 @@ INPUTS (6 features):
 ├─ Current (A)
 └─ Charging Mode (categorical: Fast, Normal, Slow)
 
-OUTPUTS (2 predictions):
+OUTPUTS (3 predictions):
 ├─ Optimal Charging Time (minutes)
-└─ Maximum Battery Temperature (°C)
+├─ Maximum Battery Temperature (°C)
+└─ Mean Battery Temperature (°C)
 ```
 
 ### 2️⃣ Physics-Informed Design

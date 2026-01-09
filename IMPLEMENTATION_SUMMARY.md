@@ -55,9 +55,10 @@ Input: 4 features               Input: 6 features
                                   ├─ Current (A)
 Output: 1 output                 └─ Charging Mode (categorical)
   └─ Temperature
-                                Output: 2 outputs
+                                Output: 3 outputs
                                   ├─ Optimal Charging Time (min)
-                                  └─ Maximum Temperature (°C)
+                                  ├─ Maximum Temperature (°C)
+                                  └─ Mean Temperature (°C)
 ```
 
 ### Model Architecture

@@ -86,6 +86,7 @@ Epoch  200 | Train Loss: 0.087654 | Val Loss: 0.091234 | Data: 0.045678 | Phys: 
 Final Metrics (Real Units):
   Charging Time - RMSE: 5.23 minutes
   Max Temperature - RMSE: 2.15 °C
+  Mean Temperature - RMSE: 1.87 °C
 
 Model saved to 'piml_battery_model.pth'
 ```
@@ -117,6 +118,7 @@ result = predict(
 
 print(f"Optimal Charging Time: {result['optimal_charging_time_minutes']:.2f} min")
 print(f"Max Temperature: {result['max_temperature_celsius']:.2f}°C")
+print(f"Mean Temperature: {result['mean_temperature_celsius']:.2f}°C")
 ```
 
 ## Understanding the Outputs
@@ -129,6 +131,11 @@ print(f"Max Temperature: {result['max_temperature_celsius']:.2f}°C")
 - **Maximum Temperature**: Peak temperature during charging (in °C)
   - Range: 20-60°C
   - Depends on: current, ambient temp, battery thermal properties
+
+- **Mean Temperature**: Average temperature during the charging process (in °C)
+  - Range: 20-60°C
+  - Calculated as: `ambient_temp + 0.6 × (max_temp - ambient_temp)`
+  - Approximates exponential temperature rise during charging
 
 ### Physics Parameters
 - **θ₁ (Heating Coefficient)**: Represents I²R heating effect
@@ -223,7 +230,8 @@ Dense(128 → 128) + BatchNorm + Tanh + Dropout(0.1)
 Dense(128 → 64) + BatchNorm + Tanh + Dropout(0.1)
   ↓
 ├─ Dense(64 → 1) + Sigmoid  →  Charging Time [0, 1]
-└─ Dense(64 → 1) + Sigmoid  →  Max Temperature [0, 1]
+├─ Dense(64 → 1) + Sigmoid  →  Max Temperature [0, 1]
+└─ Dense(64 → 1) + Sigmoid  →  Mean Temperature [0, 1]
 ```
 
 Total Parameters: ~50,432

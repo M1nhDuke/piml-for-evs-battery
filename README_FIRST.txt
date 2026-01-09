@@ -35,10 +35,10 @@
 
 ### ✅ I/O Specification
 ```
-INPUT (6 features):                OUTPUT (2 predictions):
+INPUT (6 features):                OUTPUT (3 predictions):
 ├─ Battery Type                     ├─ Optimal Charging Time (min)
-├─ State of Charge (%)              └─ Maximum Temperature (°C)
-├─ Temperature (°C)
+├─ State of Charge (%)              ├─ Maximum Temperature (°C)
+├─ Temperature (°C)                 └─ Mean Temperature (°C)
 ├─ Voltage (V)
 ├─ Current (A)
 └─ Charging Mode

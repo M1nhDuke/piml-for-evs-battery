@@ -34,9 +34,10 @@ The model implements a deep neural network with:
   - Current (A)
   - Charging Mode (categorical: Fast, Normal, Slow)
 
-- **Outputs** (2 predictions):
+- **Outputs** (3 predictions):
   - Optimal Charging Time (minutes)
   - Maximum Battery Temperature During Charge (°C)
+  - Mean Battery Temperature During Charge (°C)
 
 - **Network Design**:
   - Input Layer: 6 → 128 neurons
@@ -90,7 +91,7 @@ EARLY_STOPPING_PATIENCE = 200
 $$L_{total} = L_{MSE} + \lambda_{phys} \cdot L_{physics}$$
 
 where:
-- $L_{MSE}$ = Mean Squared Error on both outputs
+- $L_{MSE}$ = Mean Squared Error on all three outputs (charging_time, max_temp, mean_temp)
 - $L_{physics}$ = LCM residual + charge conservation + temperature constraints
 
 ## 6. Dataset

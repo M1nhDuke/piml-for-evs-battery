@@ -30,8 +30,8 @@ piml-for-evs-battery/
 ## 🎯 What Was Changed
 
 ### 1. **Model Architecture** (piml_model.py)
-   - ✅ Changed from 1 output to **2 outputs** (charging_time, max_temp)
-   - ✅ Expanded inputs from 4 to **6 features** (includes battery_type)
+   - ✅ Changed from 2 outputs to **3 outputs** (charging_time, max_temp, mean_temp)
+   - ✅ Expanded inputs from 4 to **6 features** (includes battery_type and charging_mode)
    - ✅ Increased hidden size from 64 to **128 neurons**
    - ✅ Added **batch normalization** and **dropout**
    - ✅ Implemented **residual connections**
@@ -95,7 +95,7 @@ piml-for-evs-battery/
 | Aspect | Previous | Current |
 |--------|----------|---------|
 | **Input Features** | 4 (Time, Current, Voltage, SoC) | **6 (BatteryType, SoC, Temp, Voltage, Current, Mode)** |
-| **Outputs** | 1 (Temperature only) | **2 (Charging Time + Max Temp)** |
+| **Outputs** | 1 (Temperature only) | **3 (Charging Time, Max Temp, Mean Temp)** |
 | **Dataset** | Synthetic dummy data | **Real high-quality data (1000 samples)** |
 | **Model Size** | 3 layers, 64 neurons | **4 layers, 128 neurons** |
 | **Batch Norm** | None | **Yes (4 layers)** |

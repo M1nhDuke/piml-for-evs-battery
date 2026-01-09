@@ -11,6 +11,7 @@
 - [x] **Input**: Label/Charging mode (categorical)
 - [x] **Output #1**: Optimized time to charge (minutes)
 - [x] **Output #2**: Maximum battery temperature during charge (°C)
+- [x] **Output #3**: Mean battery temperature during charge (°C)
 
 ### ✅ Physics Implementation
 - [x] Lumped Capacitance Model (LCM) implemented

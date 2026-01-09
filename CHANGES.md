@@ -17,9 +17,10 @@
   - Current (A)
   - Charging Mode/Label (categorical: Fast, Normal, Slow)
   
-- **Outputs** (Dual prediction):
+- **Outputs** (Triple prediction):
   - Optimal Charging Time (minutes) 
   - Maximum Battery Temperature During Charge (°C)
+  - Mean Battery Temperature During Charge (°C)
 
 ### 2. **Dataset Adaptation**
 
@@ -46,11 +47,11 @@
 ### 4. **Enhanced Model Architecture**
 
 ```python
-BatteryPINN(6 → 128 → 128 → 128 → 64 → [Charging Time, Max Temp])
+BatteryPINN(6 → 128 → 128 → 128 → 64 → [Charging Time, Max Temp, Mean Temp])
 ├── Batch Normalization (4 layers)
 ├── Residual Connections
 ├── Dropout (0.1)
-└── Sigmoid Output Activation
+└── Sigmoid Output Activation (3 output heads)
 ```
 
 **Key Features**:

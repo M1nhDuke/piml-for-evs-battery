@@ -24,9 +24,10 @@ HIDDEN BLOCKS (×3)
 ├─ Block 2: Dense(128→128) → BatchNorm → Tanh → Dropout(0.1)
 └─ Block 3: Dense(128→64) → BatchNorm → Tanh → Dropout(0.1)
 
-OUTPUT HEADS (Dual prediction)
+OUTPUT HEADS (Triple prediction)
 ├─ Charging Time Head:     Dense(64→1) → Sigmoid → [0,1] → Denormalize (min)
-└─ Max Temp Head:          Dense(64→1) → Sigmoid → [0,1] → Denormalize (°C)
+├─ Max Temp Head:          Dense(64→1) → Sigmoid → [0,1] → Denormalize (°C)
+└─ Mean Temp Head:         Dense(64→1) → Sigmoid → [0,1] → Denormalize (°C)
 
 PHYSICS CONSTRAINTS (LCM)
 └─ dT/dt = θ₁·I² - θ₂·(T - T_amb)   [Learnable: θ₁, θ₂]
@@ -43,7 +44,7 @@ START
 [1] LOAD DATA
     ├─ Read CSV (the_chosen_one - data.csv)
     ├─ Extract 6 input features
-    ├─ Extract 2 output targets
+    ├─ Extract 3 output targets
     └─ Total: 1000 samples
   ↓
 [2] PREPROCESS DATA
@@ -69,11 +70,11 @@ START
 [6] TRAINING LOOP (for each epoch)
     │
     ├─ FORWARD PASS
-    │  └─ model(batch_X) → (charging_time_pred, max_temp_pred)
+    │  └─ model(batch_X) → (charging_time_pred, max_temp_pred, mean_temp_pred)
     │
     ├─ LOSS CALCULATION
     │  ├─ Data Loss:
-    │  │  └─ L_data = MSE(t_pred, t_target) + MSE(T_pred, T_target)
+    │  │  └─ L_data = MSE(t_pred, t_target) + MSE(T_max_pred, T_max_target) + MSE(T_mean_pred, T_mean_target)
     │  │
     │  └─ Physics Loss:
     │     ├─ L_LCM = ||θ₁·I² - θ₂·(T-T_amb)||²
@@ -108,6 +109,7 @@ START
     ├─ Compute metrics on entire dataset:
     │  ├─ RMSE (Charging Time): ___ minutes
     │  ├─ RMSE (Max Temp): ___ °C
+    │  ├─ RMSE (Mean Temp): ___ °C
     │  ├─ Physics Parameters:
     │  │  ├─ θ₁ = ___
     │  │  └─ θ₂ = ___
@@ -147,15 +149,17 @@ START (inference.py)
     └─ Normalize with saved scaler
   ↓
 [3] FORWARD PASS
-    └─ model(input_tensor) → (time_norm [0,1], temp_norm [0,1])
+    └─ model(input_tensor) → (time_norm [0,1], temp_max_norm [0,1], temp_mean_norm [0,1])
   ↓
 [4] DENORMALIZE
     ├─ time_denorm = time_norm × 120.0  (MAX_CHARGE_TIME)
-    └─ temp_denorm = temp_norm × 60.0   (MAX_TEMP)
+    ├─ temp_max_denorm = temp_max_norm × 60.0   (MAX_TEMP)
+    └─ temp_mean_denorm = temp_mean_norm × 60.0   (MAX_TEMP)
   ↓
 [5] RETURN PREDICTIONS
     ├─ optimal_charging_time_minutes = ___
     ├─ max_temperature_celsius = ___
+    ├─ mean_temperature_celsius = ___
     └─ input_features (echo for verification)
   ↓
 END (Results ready for use)
@@ -171,7 +175,8 @@ Where:
 L_data (Mean Squared Error)
 ├─ Component 1: MSE(charging_time_pred, charging_time_target)
 ├─ Component 2: MSE(max_temp_pred, max_temp_target)
-└─ Average of both components
+├─ Component 3: MSE(mean_temp_pred, mean_temp_target)
+└─ Average of all three components
 
 L_physics (LCM Constraints)
 ├─ L_LCM: Residual of dT/dt = θ₁·I² - θ₂·(T - T_amb)
