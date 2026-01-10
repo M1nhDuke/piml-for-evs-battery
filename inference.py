@@ -151,39 +151,39 @@ if __name__ == "__main__":
     print(f"  Maximum Temperature: {result['max_temperature_celsius']:.2f}°C")
     print(f"  Mean Temperature: {result['mean_temperature_celsius']:.2f}°C")
     
-    # Example 2: Batch prediction on dataset
-    print("\n" + "="*80)
-    print("EXAMPLE 2: Batch Predictions (First 5 samples)")
-    print("="*80)
-    batch_results = batch_predict(model, scaler, battery_encoder, mode_encoder, 
-                                   'the_chosen_one  - data.csv')
-    
-    for i, result in enumerate(batch_results[:5]):
-        print(f"\nSample {i+1}:")
-        print(f"  Predicted Charging Time: {result['optimal_charging_time_minutes']:.2f} min | "
-              f"Actual: {result['actual_charging_time_minutes']:.2f} min | "
-              f"Error: {abs(result['optimal_charging_time_minutes'] - result['actual_charging_time_minutes']):.2f} min")
-        print(f"  Predicted Max Temp: {result['max_temperature_celsius']:.2f}°C | "
-              f"Actual: {result['actual_max_temp_celsius']:.2f}°C | "
-              f"Error: {abs(result['max_temperature_celsius'] - result['actual_max_temp_celsius']):.2f}°C")
-        print(f"  Predicted Mean Temp: {result['mean_temperature_celsius']:.2f}°C")
-    
-    # Calculate average errors
-    print("\n" + "="*80)
-    print("BATCH STATISTICS (All Samples)")
-    print("="*80)
-    
-    time_errors = [abs(r['optimal_charging_time_minutes'] - r['actual_charging_time_minutes']) 
-                   for r in batch_results]
-    temp_errors = [abs(r['max_temperature_celsius'] - r['actual_max_temp_celsius']) 
-                   for r in batch_results]
-    
-    print(f"Charging Time Prediction:")
-    print(f"  Mean Error: {np.mean(time_errors):.4f} minutes")
-    print(f"  Std Error: {np.std(time_errors):.4f} minutes")
-    print(f"  Max Error: {np.max(time_errors):.4f} minutes")
-    
-    print(f"\nMax Temperature Prediction:")
-    print(f"  Mean Error: {np.mean(temp_errors):.4f}°C")
-    print(f"  Std Error: {np.std(temp_errors):.4f}°C")
-    print(f"  Max Error: {np.max(temp_errors):.4f}°C")
+    # # Example 2: Batch prediction on dataset
+    # print("\n" + "="*80)
+    # print("EXAMPLE 2: Batch Predictions (First 5 samples)")
+    # print("="*80)
+    # batch_results = batch_predict(model, scaler, battery_encoder, mode_encoder, 
+    #                                'the_chosen_one  - data.csv')
+    # 
+    # for i, result in enumerate(batch_results[:5]):
+    #     print(f"\nSample {i+1}:")
+    #     print(f"  Predicted Charging Time: {result['optimal_charging_time_minutes']:.2f} min | "
+    #           f"Actual: {result['actual_charging_time_minutes']:.2f} min | "
+    #           f"Error: {abs(result['optimal_charging_time_minutes'] - result['actual_charging_time_minutes']):.2f} min")
+    #     print(f"  Predicted Max Temp: {result['max_temperature_celsius']:.2f}°C | "
+    #           f"Actual: {result['actual_max_temp_celsius']:.2f}°C | "
+    #           f"Error: {abs(result['max_temperature_celsius'] - result['actual_max_temp_celsius']):.2f}°C")
+    #     print(f"  Predicted Mean Temp: {result['mean_temperature_celsius']:.2f}°C")
+    # 
+    # # Calculate average errors
+    # print("\n" + "="*80)
+    # print("BATCH STATISTICS (All Samples)")
+    # print("="*80)
+    # 
+    # time_errors = [abs(r['optimal_charging_time_minutes'] - r['actual_charging_time_minutes']) 
+    #                for r in batch_results]
+    # temp_errors = [abs(r['max_temperature_celsius'] - r['actual_max_temp_celsius']) 
+    #                for r in batch_results]
+    # 
+    # print(f"Charging Time Prediction:")
+    # print(f"  Mean Error: {np.mean(time_errors):.4f} minutes")
+    # print(f"  Std Error: {np.std(time_errors):.4f} minutes")
+    # print(f"  Max Error: {np.max(time_errors):.4f} minutes")
+    # 
+    # print(f"\nMax Temperature Prediction:")
+    # print(f"  Mean Error: {np.mean(temp_errors):.4f}°C")
+    # print(f"  Std Error: {np.std(temp_errors):.4f}°C")
+    # print(f"  Max Error: {np.max(temp_errors):.4f}°C")
